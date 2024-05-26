@@ -13,6 +13,9 @@
 # limitations under the License.
 
 
+# Paths
+LOG_PATH = "logs"
+
 # Usuarios
 USERS = {"matata9040": "Sergio", "therealjun": "Afonso", "carlos_71156": "Carlos"}
 USER_EQ = "\n".join(
