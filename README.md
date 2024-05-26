@@ -6,20 +6,32 @@
 ![GitHub](https://img.shields.io/github/license/sertemo/DoGimoBot)
 
 ## Descripción
+Pequeño proyecto de Bot para nuestro canal de Discord enfocado al desafío fin de bootcamp entre Afonso, Carlos y yo. El Bot utiliza chatgpt en su modelo 3.5-turbo.
+
+
 
 ## Empezando
 
-### Pre-requisitos
+### Pasos previos
+#### Paso 1: Crea una aplicación en Discord
+1. Ve a Discord Developer Portal: Abre Discord Developer Portal y haz clic en "New Application".
+2. Nombra tu aplicación: Ponle un nombre a tu aplicación (puedes llamarla "ChatGPT Bot" o como prefieras) y haz clic en "Create".
+3. Configura el bot: En el menú de la izquierda, selecciona "Bot" y luego haz clic en "Add Bot". 
+4. Confirma haciendo clic en "Yes, do it!".
+ 
+#### Paso 2: Configura los permisos del bot
+1. Permisos del bot: En la sección de Bot, asegúrate de habilitar los permisos necesarios para que el bot funcione correctamente. Los permisos comunes incluyen Send Messages, Read Messages, y Manage Messages.
+2. Token del bot: Guarda el token del bot en un lugar seguro. Lo necesitarás más adelante para autenticar tu bot. Nunca compartas este token públicamente.
+
+#### Paso 3: Añade el bot a tu servidor de Discord
+1. Genera el enlace de invitación: Ve a la sección de "OAuth2" en el menú de la izquierda, selecciona "URL Generator", marca el scope "bot" y selecciona los permisos que configuraste anteriormente.
+2. Copia y pega el enlace: Copia el enlace generado y pégalo en tu navegador. Selecciona el servidor donde quieres agregar el bot y autorízalo.
+
 
 ### Instalación
 
 ## Uso
 
-## Desarrollo
-
-### Código de Conducta
-
-### Proceso de Pull Request
 
 ## Tests
 ![Pytest](https://img.shields.io/badge/testing-pytest-blue.svg)
@@ -30,6 +42,9 @@
 ## Tecnologías
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![Poetry](https://img.shields.io/badge/Poetry-60A5FA?style=for-the-badge&logo=python&logoColor=white)
+![Discord](https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white)
+![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white)
+
 
 ## Contribuyentes
 

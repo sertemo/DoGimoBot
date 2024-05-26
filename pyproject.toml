@@ -10,6 +10,9 @@ packages = [{include = "dogimobot", from = "src"}]
 python = "^3.10"
 toml = "^0.10.2"
 python-dotenv = "^1.0.1"
+openai = "^1.30.3"
+discord-py = "^2.3.2"
+icecream = "^2.1.3"
 
 
 [tool.poetry.group.dev.dependencies]
