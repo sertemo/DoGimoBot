@@ -2,12 +2,14 @@
 ### v0.1.0
 
 ![Tests](https://github.com/sertemo/DoGimoBot/actions/workflows/tests.yml/badge.svg)
+[![codecov](https://codecov.io/gh/sertemo/DoGimoBot/graph/badge.svg?token=6N7LBN76A2)](https://codecov.io/gh/sertemo/DoGimoBot)
 ![Dependabot](https://img.shields.io/badge/dependabot-enabled-blue.svg?logo=dependabot)
 ![GitHub](https://img.shields.io/github/license/sertemo/DoGimoBot)
 
 ## Descripción
 Pequeño proyecto de Bot para nuestro canal de Discord enfocado al desafío fin de bootcamp entre Afonso, Carlos y yo. El Bot utiliza chatgpt en su modelo 3.5-turbo.
 
+![alt text](assets/img/banner.jpg)
 
 
 ## Empezando

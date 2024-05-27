@@ -47,7 +47,7 @@ RECUERDA: No preguntes si puedes ayudar en algo y evita saludar repetidamente. Y
 MODELO = "gpt-3.5-turbo-0125"
 MEMORY_SIZE = 50
 DEFAULT_ERR_ANSWER = "Lo siento, no pude obtener una respuesta adecuada."
-OPENAI_PRICING = {  # POR MILLON DE TOKENS
+OPENAI_PRICING: dict[str, dict[str, float | int]] = {  # POR MILLON DE TOKENS
     "gpt-3.5-turbo-0125": {"in": 0.5, "out": 1.5},
     "gpt-3.5-turbo-instruct": {"in": 1.5, "out": 2},
     "gpt-4": {"in": 30, "out": 60},

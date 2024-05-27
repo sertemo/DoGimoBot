@@ -16,7 +16,7 @@
 from collections import deque
 from textwrap import dedent
 import time
-from typing import Deque, Union, Dict
+from typing import Deque, Union
 import uuid
 
 import discord
@@ -24,20 +24,34 @@ from discord import Message
 from icecream import ic
 from openai import OpenAI
 from openai.types.chat.chat_completion import ChatCompletion
+from openai.types.chat.chat_completion_message_param import ChatCompletionMessageParam
+from openai.types.chat.chat_completion_system_message_param import (
+    ChatCompletionSystemMessageParam,
+)
+from openai.types.chat.chat_completion_user_message_param import (
+    ChatCompletionUserMessageParam,
+)
+from openai.types.chat.chat_completion_assistant_message_param import (
+    ChatCompletionAssistantMessageParam,
+)
 
 from dogimobot import settings
 from dogimobot.logging_config import logger
 from dogimobot.utils import get_discord_key, get_openai_key
 
-
-MessageType = Union[Dict[str, str], Dict[str, Union[str, Dict[str, str]]]]
+OpenAIMessageType = Union[
+    ChatCompletionSystemMessageParam,
+    ChatCompletionUserMessageParam,
+    ChatCompletionAssistantMessageParam,
+]
 
 
 class MyClient(discord.Client):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.memory: Deque[MessageType] = deque(maxlen=settings.MEMORY_SIZE)
+        self.memory: Deque[dict[str, str]] = deque(maxlen=settings.MEMORY_SIZE)
         self.model: str = settings.MODELO
+        self.client_openai: OpenAI = OpenAI(api_key=get_openai_key())
         self.session_id: str = f"{uuid.uuid4()}"
         self.total_cost = 0.0
         self.max_cost: float = 0.0
@@ -87,11 +101,11 @@ class MyClient(discord.Client):
                     "user" if message.author.name in settings.USERS else "assistant"
                 ),
                 "content": mensaje,
-                "author": str(message.author),
+                "author": str(message.author.name),
             }
         )
 
-    def _get_context(self) -> list[MessageType]:
+    def _get_context(self) -> list[ChatCompletionMessageParam]:
         """Devuelve una lista con el formato
         apropiado para enviar a openai.
         Esta lista consta de los mensajes anteriores
@@ -105,19 +119,29 @@ class MyClient(discord.Client):
         list[dict[str, Any]]
             _description_
         """
-        context: list[MessageType] = [
-            {"role": "system", "content": settings.SYSTEM_PROMPT}
-        ] + [
-            {
-                "role": msg["role"],
-                "content": f"{msg['author']} dijo: {msg['content']}",
-            }
-            for msg in self.memory
+        context: list[ChatCompletionMessageParam] = [
+            ChatCompletionSystemMessageParam(
+                role="system", content=settings.SYSTEM_PROMPT
+            )
         ]
+        for msg in self.memory:
+            if msg["role"] == "assistant":
+                context.append(
+                    ChatCompletionAssistantMessageParam(
+                        role="assistant",
+                        content=f"{msg['author']} dijo: {msg['content']}",
+                    )
+                )
+            else:
+                context.append(
+                    ChatCompletionUserMessageParam(
+                        role="user", content=f"{msg['author']} dijo: {msg['content']}"
+                    )
+                )
         return context
 
     def _get_response_from_openai(
-        self, message: Message, context: list[MessageType]
+        self, message: Message, context: list[ChatCompletionMessageParam]
     ) -> ChatCompletion:
         """Realiza la query a la API de openAI
         y devuelve la respuesta
@@ -127,14 +151,14 @@ class MyClient(discord.Client):
         ChatCompletion
             _description_
         """
-        response: ChatCompletion = client_openai.chat.completions.create(
+        response: ChatCompletion = self.client_openai.chat.completions.create(
             model=self.model,
             messages=context
             + [
-                {
-                    "role": "user",
-                    "content": self._remove_command_from_msg(message),
-                }
+                ChatCompletionUserMessageParam(
+                    role="user",
+                    content=self._remove_command_from_msg(message),
+                )
             ],
         )
         return response
@@ -180,8 +204,11 @@ class MyClient(discord.Client):
         tuple[int, int]
             Devuelve prompt_tokens y completion_tokens
         """
-        prompt_tokens = int(response.usage.prompt_tokens)
-        completion_tokens = int(response.usage.completion_tokens)
+        prompt_tokens = completion_tokens = 0
+
+        if response.usage is not None:
+            prompt_tokens = int(response.usage.prompt_tokens)
+            completion_tokens = int(response.usage.completion_tokens)
 
         return prompt_tokens, completion_tokens
 
@@ -295,7 +322,8 @@ class MyClient(discord.Client):
             elapsed_time = time.perf_counter() - self.session_start
             hours, remainder = divmod(elapsed_time, 3600)
             minutes, seconds = divmod(remainder, 60)
-            reply = dedent(f"""
+            reply = dedent(
+                f"""
             # ID SESIÓN
             {self.session_id}
 
@@ -310,11 +338,13 @@ class MyClient(discord.Client):
 
             ## Coste máximo de petición ($)
             {round(self.max_cost, 4)}
-            """)
+            """
+            )
             await message.channel.send(reply)
 
         elif message.content.startswith(settings.HELP_COMMAND):
-            reply = dedent(f"""
+            reply = dedent(
+                f"""
             # Comandos
             ## Chatear con el bot
             ```
@@ -333,7 +363,8 @@ class MyClient(discord.Client):
             {settings.HELP_COMMAND}
             ```
             Devuelve los comandos disponibles
-            """)
+            """
+            )
             await message.channel.send(reply)
 
 
@@ -342,6 +373,5 @@ if __name__ == "__main__":
     intents.message_content = True
     intents.members = True
 
-    client_openai = OpenAI(api_key=get_openai_key())
     client = MyClient(intents=intents)
     client.run(get_discord_key())
