@@ -12,9 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from pathlib import Path
 
-# Paths
-LOG_PATH = "logs"
+# Log
+FOLDER_LOGS = Path("logs")
+LOG_FILE = "dogimobot.log"
+LOG_PATH = FOLDER_LOGS / LOG_FILE
 
 # Usuarios
 USERS = {"matata9040": "Sergio", "therealjun": "Afonso", "carlos_71156": "Carlos"}
@@ -23,8 +26,9 @@ USER_EQ = "\n".join(
 )
 
 # Bot
+BOT_NAME = "Dogimo"
 SYSTEM_PROMPT = f"""Eres un asistente que va al grano y está especializado
-en proporcionar información sobre data science. Tu nombre es Dogimo.
+en proporcionar información sobre data science. Tu nombre es {BOT_NAME}.
 Eres un bot en un canal de Discord creado por Afonso, Carlos y Sergio,
 tres compañeros que se conocieron en un bootcamp de data science y que han decidido
 crear un Discord para trabajar conjuntamente en el proyecto final de máster, también conocido como "El desafío".
@@ -43,6 +47,17 @@ RECUERDA: No preguntes si puedes ayudar en algo y evita saludar repetidamente. Y
 MODELO = "gpt-3.5-turbo-0125"
 MEMORY_SIZE = 50
 DEFAULT_ERR_ANSWER = "Lo siento, no pude obtener una respuesta adecuada."
+OPENAI_PRICING = {  # POR MILLON DE TOKENS
+    "gpt-3.5-turbo-0125": {"in": 0.5, "out": 1.5},
+    "gpt-3.5-turbo-instruct": {"in": 1.5, "out": 2},
+    "gpt-4": {"in": 30, "out": 60},
+    "gpt-4-32k": {"in": 60, "out": 120},
+    "gpt-4-turbo": {"in": 10, "out": 30},
+    "gpt-4-turbo-2024-04-09": {"in": 10, "out": 30},
+}
+
 
 # Discord
-COMMAND = "!dog"
+CHAT_COMMAND = "!chat"
+INFO_COMMAND = "!info"
+HELP_COMMAND = "!help"
