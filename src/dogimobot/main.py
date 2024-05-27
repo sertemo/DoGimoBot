@@ -45,7 +45,6 @@ OpenAIMessageType = Union[
     ChatCompletionAssistantMessageParam,
 ]
 
-
 class MyClient(discord.Client):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -84,7 +83,8 @@ class MyClient(discord.Client):
         str
             _description_
         """
-        return message.content.replace(settings.CHAT_COMMAND, "").strip()
+        mensaje: str = message.content.replace(settings.CHAT_COMMAND, "").strip()
+        return mensaje
 
     def _save_in_memory(self, message: Message) -> None:
         """Guarda un dict en memoria para
@@ -324,7 +324,8 @@ class MyClient(discord.Client):
             minutes, seconds = divmod(remainder, 60)
             reply = dedent(
                 f"""
-            # ID SESIÓN
+            # Información de la sesión
+            ## Id
             {self.session_id}
 
             ## Tiempo transcurrido
@@ -333,11 +334,11 @@ class MyClient(discord.Client):
             ## Tokens totales consumidos
             {self.total_tokens}
 
-            ## Coste total ($)
-            {round(self.total_cost, 4)}
+            ## Coste total
+            {round(self.total_cost, 4)} $
 
-            ## Coste máximo de petición ($)
-            {round(self.max_cost, 4)}
+            ## Coste máximo de petición
+            {round(self.max_cost, 4)} $
             """
             )
             await message.channel.send(reply)

@@ -56,7 +56,6 @@ OPENAI_PRICING: dict[str, dict[str, float | int]] = {  # POR MILLON DE TOKENS
     "gpt-4-turbo-2024-04-09": {"in": 10, "out": 30},
 }
 
-
 # Discord
 CHAT_COMMAND = "!chat"
 INFO_COMMAND = "!info"
