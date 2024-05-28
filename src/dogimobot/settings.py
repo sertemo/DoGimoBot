@@ -19,6 +19,11 @@ FOLDER_LOGS = Path("logs")
 LOG_FILE = "dogimobot.log"
 LOG_PATH = FOLDER_LOGS / LOG_FILE
 
+# Templates
+TEMPLATE_FOLDER = Path("templates")
+STATS_REPLY_FILE = "stats_reply.md"
+STATS_REPLY_TEMPLATE = TEMPLATE_FOLDER / STATS_REPLY_FILE
+
 # Usuarios
 USERS = {"matata9040": "Sergio", "therealjun": "Afonso", "carlos_71156": "Carlos"}
 USER_EQ = "\n".join(
@@ -58,5 +63,5 @@ OPENAI_PRICING: dict[str, dict[str, float | int]] = {  # POR MILLON DE TOKENS
 
 # Discord
 CHAT_COMMAND = "!chat"
-INFO_COMMAND = "!info"
+INFO_COMMAND = "!stats"
 HELP_COMMAND = "!help"

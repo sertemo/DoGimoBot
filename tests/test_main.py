@@ -30,17 +30,17 @@ from openai.types.chat.chat_completion_assistant_message_param import (
 )
 
 from dogimobot import settings
-from dogimobot.main import MyClient, OpenAIMessageType
+from dogimobot.main import DiscordClient, OpenAIMessageType
 
 
 
-def test_remove_command_from_msg(client: MyClient):
+def test_remove_command_from_msg(client: DiscordClient):
     message = MagicMock(spec=Message)
     message.content = "!chat test message"
     result = client._remove_command_from_msg(message)
     assert result == "test message"
 
-def test_save_in_memory(client: MyClient):
+def test_save_in_memory(client: DiscordClient):
     message = MagicMock(spec=Message)
     message.content = "!chat test message"
     message.author.name = "testuser"
@@ -50,7 +50,7 @@ def test_save_in_memory(client: MyClient):
     assert client.memory[0]['content'] == 'test message'
     assert client.memory[0]['author'] == 'testuser'
 
-def test_get_context(client: MyClient):
+def test_get_context(client: DiscordClient):
     #message = MagicMock(spec=Message)
     #message.content = "!chat test message"
     #message.author.name = "testuser"
@@ -64,7 +64,7 @@ def test_get_context(client: MyClient):
     assert 'testuser dijo: test message' in context[1]['content']
 
 @pytest.mark.asyncio
-async def test_get_response_from_openai(client: MyClient):
+async def test_get_response_from_openai(client: DiscordClient):
     message = MagicMock(spec=Message)
     message.content = "!dog test message"
     context = client._get_context()
@@ -78,7 +78,7 @@ async def test_get_response_from_openai(client: MyClient):
     assert response
 
 @pytest.mark.asyncio
-async def test_on_message(client: MyClient):
+async def test_on_message(client: DiscordClient):
     client.client_openai.chat = MagicMock()
     client.client_openai.chat.completions.create = AsyncMock(return_value=MagicMock(spec=ChatCompletion))
 
@@ -93,14 +93,14 @@ async def test_on_message(client: MyClient):
     client.client_openai.chat.completions.create.assert_called_once()
     assert len(client.memory) == 2  # Original + assistant response
 
-def test_calculate_total_cost(client: MyClient):
+def test_calculate_total_cost(client: DiscordClient):
     in_tokens = 1000
     out_tokens = 2000
     total_cost = client._calculate_total_cost(in_tokens, out_tokens)
     expected_cost = (in_tokens / 1e6) * 0.0001 + (out_tokens / 1e6) * 0.0002
     assert total_cost == pytest.approx(expected_cost, rel=1e-6)
 
-def test_get_tokens_from_response(client: MyClient):
+def test_get_tokens_from_response(client: DiscordClient):
     mock_response = MagicMock(spec=ChatCompletion)
     mock_response.usage = MagicMock()
     mock_response.usage.prompt_tokens = 10

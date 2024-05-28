@@ -14,9 +14,10 @@
 
 
 from collections import deque
+from datetime import datetime
 from textwrap import dedent
 import time
-from typing import Deque, Union
+from typing import Deque, Union, Any
 import uuid
 
 import discord
@@ -36,6 +37,8 @@ from openai.types.chat.chat_completion_assistant_message_param import (
 )
 
 from dogimobot import settings
+from dogimobot.exceptions import FormatterException
+from dogimobot.formatters import format_stats
 from dogimobot.logging_config import logger
 from dogimobot.utils import get_discord_key, get_openai_key
 
@@ -45,7 +48,8 @@ OpenAIMessageType = Union[
     ChatCompletionAssistantMessageParam,
 ]
 
-class MyClient(discord.Client):
+
+class DiscordClient(discord.Client):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.memory: Deque[dict[str, str]] = deque(maxlen=settings.MEMORY_SIZE)
@@ -55,8 +59,11 @@ class MyClient(discord.Client):
         self.total_cost = 0.0
         self.max_cost: float = 0.0
         self.total_tokens: int = 0
+        # Estadísticas de usuario
+        self.user_stats: dict[str, dict[str, Any]] = {}
         # Iniciamos contar de sesión
         self.session_start: float = time.perf_counter()
+        self.session_start_date: str = datetime.now().strftime("%d/%m/%Y - %H:%M:%S")
         # Validamos que el modelo sea válido
         self._validate_model()
 
@@ -258,6 +265,14 @@ class MyClient(discord.Client):
 
         self.total_cost += total_cost
 
+    def _add_user_stats(
+        self, message: Message, total_tokens: int, total_cost: float
+    ) -> None:
+        """Alimenta las estadísticas de los usuarios
+        para llevar registro del gasto de cada uno en la sesión"""
+        self.user_stats[message.author.name]["tokens"] += total_tokens
+        self.user_stats[message.author.name]["cost"] += total_cost
+
     async def on_ready(self):
         logger.info(f"********* SESSION ID {self.session_id} *********")
         ic(f"Logged on as {self.user}")
@@ -303,6 +318,9 @@ class MyClient(discord.Client):
             # Sumamos al coste total de la sesión
             self._add_total_cost(total_cost)
 
+            # Alimentamos las estadísticas
+            self._add_user_stats(message, total_tokens, total_cost)
+
             # Añadimos la respuesta a memoria
             self.memory.append(
                 {"role": "assistant", "content": reply, "author": settings.BOT_NAME}
@@ -310,10 +328,12 @@ class MyClient(discord.Client):
 
             # Añadimos respuesta de openAI junto con costes al logging
             logger.info(
-                f"SESSION ID: {self.session_id} \
-                        | {settings.BOT_NAME} dijo: {reply} \
-                            | Tokens totales: {total_tokens} \
-                                | Coste total: {total_cost}"
+                dedent(
+                    f"SESSION ID: {self.session_id} \
+            | {settings.BOT_NAME} dijo: {reply} \
+            | Tokens totales: {total_tokens} \
+            | Coste total: {total_cost}"
+                )
             )
 
             await message.channel.send(reply)
@@ -322,25 +342,25 @@ class MyClient(discord.Client):
             elapsed_time = time.perf_counter() - self.session_start
             hours, remainder = divmod(elapsed_time, 3600)
             minutes, seconds = divmod(remainder, 60)
-            reply = dedent(
-                f"""
-            # Información de la sesión
-            ## Id
-            {self.session_id}
 
-            ## Tiempo transcurrido
-            {int(hours)} horas, {int(minutes)} minutos, {int(seconds)} segundos
+            try:
+                reply = format_stats(
+                    template=settings.STATS_REPLY_TEMPLATE,
+                    session_id=self.session_id,
+                    elapsed_hours=int(hours),
+                    elapsed_minutes=int(minutes),
+                    elapsed_seconds=int(seconds),
+                    total_tokens=self.total_tokens,
+                    total_cost=round(self.total_cost, 4),
+                    user_stats=self.user_stats,
+                    max_cost=round(self.max_cost, 4),
+                    session_start_time=self.session_start_date,
+                )
+            except FormatterException as fexc:
+                msg = f"Se ha producido un error {fexc}"
+                logger.error(msg)
+                print(msg)
 
-            ## Tokens totales consumidos
-            {self.total_tokens}
-
-            ## Coste total
-            {round(self.total_cost, 4)} $
-
-            ## Coste máximo de petición
-            {round(self.max_cost, 4)} $
-            """
-            )
             await message.channel.send(reply)
 
         elif message.content.startswith(settings.HELP_COMMAND):
@@ -374,5 +394,5 @@ if __name__ == "__main__":
     intents.message_content = True
     intents.members = True
 
-    client = MyClient(intents=intents)
+    client = DiscordClient(intents=intents)
     client.run(get_discord_key())

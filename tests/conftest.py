@@ -19,7 +19,7 @@ from openai import OpenAI
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 import discord
-from dogimobot.main import MyClient
+from dogimobot.main import DiscordClient
 
 # Mock settings to use in tests
 class MockSettings:
@@ -54,7 +54,7 @@ def client(mock_settings, mock_openai):
     intents = discord.Intents.default()
     intents.message_content = True
     intents.members = True
-    client = MyClient(intents=intents)
+    client = DiscordClient(intents=intents)
     client.client_openai = AsyncMock(spec=OpenAI)
     client.session_id = "test_session_id"
     client.memory = deque(maxlen=MockSettings.MEMORY_SIZE)
