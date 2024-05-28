@@ -1,29 +1,18 @@
-**📊 Estadísticas de la Sesión**
+# 📊 Estadísticas de la Sesión
 
-**🆔 ID de Sesión:** `{session_id}`
+**🆔 ID de Sesión:** `$session_id`
 
-**⏳ Tiempo Transcurrido:**
-{elapsed_hours} horas, {elapsed_minutes} minutos, {elapsed_seconds} segundos
+**⏳ Tiempo Transcurrido:** $elapsed_hours:$elapsed_minutes:$elapsed_seconds
 
-**🔢 Tokens Consumidos:**
-{total_tokens}
+**🔢 Tokens Consumidos:** $total_tokens
 
-**💰 Coste Total:**
-${total_cost}
+**📈 Coste Máximo de Petición:** $max_cost $$
 
----
+**💰 Coste Total:** $total_cost $$
 
-**👥 Consumo por Usuario:**
 
-| Usuario   | Tokens Consumidos | Coste ($)  |
-|-----------|-------------------|------------|
-{user_stats}
+## 👥 Consumo por Usuario
+$user_stats
 
----
-
-**📈 Coste Máximo de Petición:**
-${max_cost}
-
----
-
-_Sesion iniciada el {session_start_time}_
+-
+*Sesion iniciada el $session_start_time*

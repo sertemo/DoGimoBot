@@ -13,11 +13,11 @@
 # limitations under the License.
 
 
-from collections import deque
+from collections import deque, defaultdict
 from datetime import datetime
 from textwrap import dedent
 import time
-from typing import Deque, Union, Any
+from typing import Deque, Union
 import uuid
 
 import discord
@@ -60,7 +60,9 @@ class DiscordClient(discord.Client):
         self.max_cost: float = 0.0
         self.total_tokens: int = 0
         # Estadísticas de usuario
-        self.user_stats: dict[str, dict[str, Any]] = {}
+        self.user_stats: defaultdict[str, dict[str, Union[int, float]]] = defaultdict(
+            lambda: {"tokens": 0, "cost": 0.0}
+        )
         # Iniciamos contar de sesión
         self.session_start: float = time.perf_counter()
         self.session_start_date: str = datetime.now().strftime("%d/%m/%Y - %H:%M:%S")
@@ -282,6 +284,9 @@ class DiscordClient(discord.Client):
         if message.author == self.user or message.author.bot:
             return
 
+        # Inicializamos reply para evitar errores
+        reply = ""
+
         # Guarda el mensaje en la memoria
         self._save_in_memory(message)
 
@@ -304,7 +309,7 @@ class DiscordClient(discord.Client):
                 print(f"Se ha producido un error: {exc}")
                 return
 
-            reply: str = self._get_reply_from_openai(response)
+            reply = self._get_reply_from_openai(response)
             # Sacamos los in y out tokens
             in_tokens, out_tokens = self._get_tokens_from_response(response)
             total_tokens = in_tokens + out_tokens
@@ -336,8 +341,6 @@ class DiscordClient(discord.Client):
                 )
             )
 
-            await message.channel.send(reply)
-
         elif message.content.startswith(settings.INFO_COMMAND):
             elapsed_time = time.perf_counter() - self.session_start
             hours, remainder = divmod(elapsed_time, 3600)
@@ -357,11 +360,14 @@ class DiscordClient(discord.Client):
                     session_start_time=self.session_start_date,
                 )
             except FormatterException as fexc:
-                msg = f"Se ha producido un error {fexc}"
-                logger.error(msg)
-                print(msg)
+                reply = f"Se ha producido un error al formatear {fexc}"
+                logger.error(reply)
+                print(reply)
 
-            await message.channel.send(reply)
+            except Exception as exc:
+                reply = f"Se ha producido un error {exc}"
+                logger.error(reply)
+                print(reply)
 
         elif message.content.startswith(settings.HELP_COMMAND):
             reply = dedent(
@@ -386,7 +392,8 @@ class DiscordClient(discord.Client):
             Devuelve los comandos disponibles
             """
             )
-            await message.channel.send(reply)
+
+        await message.channel.send(reply)
 
 
 if __name__ == "__main__":
