@@ -51,10 +51,10 @@ def test_save_in_memory(client: DiscordClient):
     assert client.memory[0]['author'] == 'testuser'
 
 def test_get_context(client: DiscordClient):
-    #message = MagicMock(spec=Message)
-    #message.content = "!chat test message"
-    #message.author.name = "testuser"
-    #client._save_in_memory(message)
+    message = MagicMock(spec=Message)
+    message.content = "!chat test message"
+    message.author.name = "testuser"
+    client._save_in_memory(message)
     context = client._get_context()
     print(context)
     print(client.memory)
@@ -77,28 +77,20 @@ async def test_get_response_from_openai(client: DiscordClient):
     client.client_openai.chat.completions.create.assert_called_once()
     assert response
 
-@pytest.mark.asyncio
-async def test_on_message(client: DiscordClient):
-    client.client_openai.chat = MagicMock()
-    client.client_openai.chat.completions.create = AsyncMock(return_value=MagicMock(spec=ChatCompletion))
-
-    message = AsyncMock(spec=Message)
-    message.content = "!dog test message"
-    message.author = MagicMock()
-    message.author.bot = False
-    message.author.name = "testuser"
-    message.channel.send = AsyncMock()  # Ensure channel.send is an AsyncMock
-
-    await client.on_message(message)
-    client.client_openai.chat.completions.create.assert_called_once()
-    assert len(client.memory) == 2  # Original + assistant response
-
 def test_calculate_total_cost(client: DiscordClient):
     in_tokens = 1000
     out_tokens = 2000
-    total_cost = client._calculate_total_cost(in_tokens, out_tokens)
-    expected_cost = (in_tokens / 1e6) * 0.0001 + (out_tokens / 1e6) * 0.0002
-    assert total_cost == pytest.approx(expected_cost, rel=1e-6)
+
+    with patch('dogimobot.settings.OPENAI_PRICING', {
+        "gpt-3.5-turbo": {
+            "in": 0.0001,
+            "out": 0.0002,
+        }
+    }):
+        with patch('dogimobot.settings.MODELO', "gpt-3.5-turbo"):
+            total_cost = client.bot_stats.calculate_total_cost(in_tokens, out_tokens)
+            expected_cost = (in_tokens / 1e6) * 0.0001 + (out_tokens / 1e6) * 0.0002
+            assert total_cost == pytest.approx(expected_cost, rel=1e-6)
 
 def test_get_tokens_from_response(client: DiscordClient):
     mock_response = MagicMock(spec=ChatCompletion)

@@ -36,7 +36,14 @@ LOGGING_CONFIG = {
             "filename": LOG_PATH,
             "maxBytes": 100_000,
             "backupCount": 3,
-        }
+            "encoding": "utf-8",
+        },
+        "console": {  # Handler para printear por pantalla. Agregarlo a handlers debajo
+            "class": "logging.StreamHandler",
+            "level": "INFO",
+            "formatter": "simple",
+            "stream": "ext://sys.stdout",
+        },
     },
     "loggers": {"root": {"level": "INFO", "handlers": ["file"]}},
 }

@@ -13,9 +13,8 @@
 # limitations under the License.
 
 
-from collections import deque, defaultdict
+from collections import deque
 from datetime import datetime
-from textwrap import dedent
 import time
 from typing import Deque, Union
 import uuid
@@ -38,8 +37,9 @@ from openai.types.chat.chat_completion_assistant_message_param import (
 
 from dogimobot import settings
 from dogimobot.exceptions import FormatterException
-from dogimobot.formatters import format_stats
+from dogimobot.formatters import format_stats, format_help
 from dogimobot.logging_config import logger
+from dogimobot.stats import BotStats
 from dogimobot.utils import get_discord_key, get_openai_key
 
 OpenAIMessageType = Union[
@@ -56,13 +56,8 @@ class DiscordClient(discord.Client):
         self.model: str = settings.MODELO
         self.client_openai: OpenAI = OpenAI(api_key=get_openai_key())
         self.session_id: str = f"{uuid.uuid4()}"
-        self.total_cost = 0.0
-        self.max_cost: float = 0.0
-        self.total_tokens: int = 0
-        # Estadísticas de usuario
-        self.user_stats: defaultdict[str, dict[str, Union[int, float]]] = defaultdict(
-            lambda: {"tokens": 0, "cost": 0.0}
-        )
+        # Inicializamos estadísticas
+        self.bot_stats: BotStats = BotStats()
         # Iniciamos contar de sesión
         self.session_start: float = time.perf_counter()
         self.session_start_date: str = datetime.now().strftime("%d/%m/%Y - %H:%M:%S")
@@ -221,60 +216,6 @@ class DiscordClient(discord.Client):
 
         return prompt_tokens, completion_tokens
 
-    def _add_total_tokens(self, total_tokens: int) -> None:
-        """Suma a total_tokens los tokens de la query
-        para llevar un registro
-
-        Parameters
-        ----------
-        total_tokens : int
-            _description_
-        """
-        self.total_tokens += total_tokens
-
-    def _calculate_total_cost(self, in_tokens: int, out_tokens: int) -> float:
-        """Devuelve el coste total en función
-        de los tokens in y out y el modelo
-        escogido
-
-        Parameters
-        ----------
-        in_tokens : int
-            _description_
-        out_tokens : int
-            _description_
-
-        Returns
-        -------
-        float
-            _description_
-        """
-        in_cost: float = (in_tokens / 1e6) * settings.OPENAI_PRICING[self.model]["in"]
-        out_cost: float = (out_tokens / 1e6) * settings.OPENAI_PRICING[self.model][
-            "out"
-        ]
-
-        return in_cost + out_cost
-
-    def _add_total_cost(self, total_cost: float) -> None:
-        """Suma a la sesión el coste de la query
-
-        Parameters
-        ----------
-        total_cost : float
-            _description_
-        """
-
-        self.total_cost += total_cost
-
-    def _add_user_stats(
-        self, message: Message, total_tokens: int, total_cost: float
-    ) -> None:
-        """Alimenta las estadísticas de los usuarios
-        para llevar registro del gasto de cada uno en la sesión"""
-        self.user_stats[message.author.name]["tokens"] += total_tokens
-        self.user_stats[message.author.name]["cost"] += total_cost
-
     async def on_ready(self):
         logger.info(f"********* SESSION ID {self.session_id} *********")
         ic(f"Logged on as {self.user}")
@@ -292,11 +233,11 @@ class DiscordClient(discord.Client):
 
         # Logging
         logger.info(
-            f"SESSION ID: {self.session_id} | {message.author} dijo: {message.content}"
+            f"SESSION STARTED\nSESSION ID: {self.session_id} | {message.author} dijo: {message.content}"
         )
 
         # Si el mensaje contiene el comando, responde
-        if message.content.startswith(settings.CHAT_COMMAND):
+        if message.content.lower().startswith(settings.CHAT_COMMAND):
 
             # Prepara el contexto incluyendo las últimas interacciones
             context = self._get_context()
@@ -313,18 +254,22 @@ class DiscordClient(discord.Client):
             # Sacamos los in y out tokens
             in_tokens, out_tokens = self._get_tokens_from_response(response)
             total_tokens = in_tokens + out_tokens
+
             # Sumamos los tokens totales a la sesión
-            self._add_total_tokens(total_tokens)
+            self.bot_stats.add_total_tokens(total_tokens)
+            # Añadimos 1 a las queries totales
+            self.bot_stats.add_total_queries()
 
             # Calculamos el coste total
-            total_cost: float = self._calculate_total_cost(in_tokens, out_tokens)
-            # Actualizamos el coste maximo
-            self.max_cost = max(self.max_cost, total_cost)
+            total_cost: float = self.bot_stats.calculate_total_cost(
+                in_tokens, out_tokens
+            )
+
             # Sumamos al coste total de la sesión
-            self._add_total_cost(total_cost)
+            self.bot_stats.add_total_and_max_cost(total_cost)
 
             # Alimentamos las estadísticas
-            self._add_user_stats(message, total_tokens, total_cost)
+            self.bot_stats.add_user_stats(message, total_tokens, total_cost)
 
             # Añadimos la respuesta a memoria
             self.memory.append(
@@ -332,16 +277,15 @@ class DiscordClient(discord.Client):
             )
 
             # Añadimos respuesta de openAI junto con costes al logging
-            logger.info(
-                dedent(
-                    f"SESSION ID: {self.session_id} \
-            | {settings.BOT_NAME} dijo: {reply} \
-            | Tokens totales: {total_tokens} \
-            | Coste total: {total_cost}"
-                )
+            log_msg = (
+                f"SESSION ID: {self.session_id} | "
+                f"{settings.BOT_NAME} dijo: {reply} | "
+                f"Tokens totales: {total_tokens} | "
+                f"Coste total: {total_cost}"
             )
+            logger.info(log_msg)
 
-        elif message.content.startswith(settings.INFO_COMMAND):
+        elif message.content.lower().startswith(settings.INFO_COMMAND):
             elapsed_time = time.perf_counter() - self.session_start
             hours, remainder = divmod(elapsed_time, 3600)
             minutes, seconds = divmod(remainder, 60)
@@ -353,10 +297,11 @@ class DiscordClient(discord.Client):
                     elapsed_hours=int(hours),
                     elapsed_minutes=int(minutes),
                     elapsed_seconds=int(seconds),
-                    total_tokens=self.total_tokens,
-                    total_cost=round(self.total_cost, 4),
-                    user_stats=self.user_stats,
-                    max_cost=round(self.max_cost, 4),
+                    total_tokens=self.bot_stats.total_tokens,
+                    total_queries=self.bot_stats.total_queries,
+                    total_cost=round(self.bot_stats.total_cost, 4),
+                    user_stats=self.bot_stats.user_stats,
+                    max_cost=round(self.bot_stats.max_cost, 4),
                     session_start_time=self.session_start_date,
                 )
             except FormatterException as fexc:
@@ -369,28 +314,12 @@ class DiscordClient(discord.Client):
                 logger.error(reply)
                 print(reply)
 
-        elif message.content.startswith(settings.HELP_COMMAND):
-            reply = dedent(
-                f"""
-            # Comandos
-            ## Chatear con el bot
-            ```
-            {settings.CHAT_COMMAND} <mensaje>
-            ```
-            Manda una pregunta a openAI y el bot te contesta
-
-            ## Información de sesión
-            ```
-            {settings.INFO_COMMAND}
-            ```
-            Da información de la sesión como el coste total y los tokens utilizados
-
-            ## Comandos disponibles
-            ```
-            {settings.HELP_COMMAND}
-            ```
-            Devuelve los comandos disponibles
-            """
+        elif message.content.lower().startswith(settings.HELP_COMMAND):
+            reply = format_help(
+                settings.HELP_REPLY_TEMPLATE,
+                chat_command=settings.CHAT_COMMAND,
+                stats_command=settings.INFO_COMMAND,
+                help_command=settings.HELP_COMMAND,
             )
 
         await message.channel.send(reply)

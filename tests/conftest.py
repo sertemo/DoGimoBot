@@ -49,7 +49,7 @@ def mock_openai():
     with patch("dogimobot.main.OpenAI", new=AsyncMock) as mock:
         yield mock
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def client(mock_settings, mock_openai):
     intents = discord.Intents.default()
     intents.message_content = True
@@ -59,8 +59,5 @@ def client(mock_settings, mock_openai):
     client.session_id = "test_session_id"
     client.memory = deque(maxlen=MockSettings.MEMORY_SIZE)
     client.model = MockSettings.MODELO
-    client.total_cost = 0.0
-    client.max_cost = 0.0
-    client.total_tokens = 0
     client.session_start = time.perf_counter()
     return client
