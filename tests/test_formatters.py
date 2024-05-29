@@ -23,6 +23,8 @@ def sample_help_template():
 def test_format_stats(sample_template):
     template_content = (
         "Session ID: $session_id\n"
+        "modelo: $model\n"
+        "version: $version\n"
         "Elapsed Time: $elapsed_days días, $elapsed_hours:$elapsed_minutes:$elapsed_seconds\n"
         "Total Tokens: $total_tokens\n"
         "Total Queries: $total_queries\n"
@@ -38,6 +40,8 @@ def test_format_stats(sample_template):
             formatted = format_stats(
                 template=sample_template,
                 session_id="12345",
+                version='0.1.0',
+                model='gpt-4',
                 elapsed_days=3,
                 elapsed_hours=1,
                 elapsed_minutes=2,
@@ -55,6 +59,8 @@ def test_format_stats(sample_template):
 
             expected_output = (
                 "Session ID: 12345\n"
+                "modelo: gpt-4\n"
+                "version: 0.1.0\n"
                 "Elapsed Time: 3 días, 01:02:03\n"
                 "Total Tokens: 456\n"
                 "Total Queries: 7\n"
@@ -127,6 +133,8 @@ def test_format_stats_raises_exception(sample_template):
         format_stats(
             template=sample_template,
             session_id="12345",
+            version='0.1.0',
+            model="gpt-3.5-turbo",
             elapsed_days=3,
             elapsed_hours=1,
             elapsed_minutes=2,

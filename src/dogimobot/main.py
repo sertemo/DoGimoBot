@@ -40,7 +40,7 @@ from dogimobot.exceptions import FormatterException
 from dogimobot.formatters import format_stats, format_help
 from dogimobot.logging_config import logger
 from dogimobot.stats import BotStats
-from dogimobot.utils import get_discord_key, get_openai_key
+from dogimobot.utils import get_discord_key, get_openai_key, get_project_version
 
 OpenAIMessageType = Union[
     ChatCompletionSystemMessageParam,
@@ -295,6 +295,8 @@ class DiscordClient(discord.Client):
                 reply = format_stats(
                     template=settings.STATS_REPLY_TEMPLATE,
                     session_id=self.session_id,
+                    version=get_project_version(),
+                    model=self.model,
                     elapsed_days=int(days),
                     elapsed_hours=int(hours),
                     elapsed_minutes=int(minutes),

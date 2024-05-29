@@ -62,7 +62,7 @@ $help_command
 - Si tienes alguna duda, usa el comando `$help_command` para obtener esta lista de comandos nuevamente.
 - Puedes ver más detalle del bot visitando el [repositorio](https://github.com/sertemo/DoGimoBot) de github.
 
-
+## SemVer
 
 ## Tests
 ![Pytest](https://img.shields.io/badge/testing-pytest-blue.svg)

@@ -13,10 +13,21 @@
 # limitations under the License.
 
 import os
+from typing import Any
 
 from dotenv import load_dotenv
+import toml
 
 load_dotenv()
+
+
+def get_project_version() -> str:
+    """Devuelve la versión del proyecto
+    extraido del pyproject.toml"""
+    with open("pyproject.toml", "r") as file:
+        data: dict[str, Any] = toml.load(file)
+        version: str = data["tool"]["poetry"]["version"]
+    return version
 
 
 def get_openai_key() -> str:
