@@ -24,6 +24,7 @@ from dogimobot.settings import USERS
 def format_stats(
     template: Path,
     session_id: str,
+    elapsed_days: int,
     elapsed_hours: int,
     elapsed_minutes: int,
     elapsed_seconds: int,
@@ -103,6 +104,7 @@ def format_stats(
 
     return plantilla.safe_substitute(
         session_id=session_id,
+        elapsed_days=elapsed_days,
         elapsed_hours=str(elapsed_hours).zfill(2),
         elapsed_minutes=str(elapsed_minutes).zfill(2),
         elapsed_seconds=str(elapsed_seconds).zfill(2),

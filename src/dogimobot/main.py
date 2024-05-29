@@ -287,13 +287,15 @@ class DiscordClient(discord.Client):
 
         elif message.content.lower().startswith(settings.INFO_COMMAND):
             elapsed_time = time.perf_counter() - self.session_start
-            hours, remainder = divmod(elapsed_time, 3600)
+            days, remainder = divmod(elapsed_time, 86400)  # 86400 segundos en un día
+            hours, remainder = divmod(remainder, 3600)
             minutes, seconds = divmod(remainder, 60)
 
             try:
                 reply = format_stats(
                     template=settings.STATS_REPLY_TEMPLATE,
                     session_id=self.session_id,
+                    elapsed_days=int(days),
                     elapsed_hours=int(hours),
                     elapsed_minutes=int(minutes),
                     elapsed_seconds=int(seconds),

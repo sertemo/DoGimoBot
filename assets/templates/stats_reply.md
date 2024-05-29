@@ -2,7 +2,7 @@
 
 **🆔 ID de Sesión:** `$session_id`
 
-**⏳ Tiempo Transcurrido:** `$elapsed_hours:$elapsed_minutes:$elapsed_seconds`
+**⏳ Tiempo Transcurrido:** `$elapsed_days días, $elapsed_hours:$elapsed_minutes:$elapsed_seconds`
 
 **#️⃣ Peticiones totales:** `$total_queries`
 
