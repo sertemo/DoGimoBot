@@ -22,3 +22,4 @@ $help_command
 - Asegúrate de usar los comandos tal como se muestran.
 - Los comandos no son sensibles a mayúsculas y minúsculas.
 - Si tienes alguna duda, usa el comando `$help_command` para obtener esta lista de comandos nuevamente.
+- Puedes ver más detalle del bot visitando el [repositorio](https://github.com/sertemo/DoGimoBot) de github.
