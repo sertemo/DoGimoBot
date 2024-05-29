@@ -5,6 +5,7 @@
 [![codecov](https://codecov.io/gh/sertemo/DoGimoBot/graph/badge.svg?token=6N7LBN76A2)](https://codecov.io/gh/sertemo/DoGimoBot)
 ![Dependabot](https://img.shields.io/badge/dependabot-enabled-blue.svg?logo=dependabot)
 ![GitHub](https://img.shields.io/github/license/sertemo/DoGimoBot)
+![Docker](https://img.shields.io/docker/image-size/sertemo/dogimobot?color=blue&logo=docker)
 
 ## Descripción
 Pequeño proyecto de Bot para nuestro canal de Discord enfocado al desafío fin de bootcamp entre Afonso, Carlos y yo. El Bot utiliza chatgpt en su modelo 3.5-turbo.
@@ -30,9 +31,37 @@ Pequeño proyecto de Bot para nuestro canal de Discord enfocado al desafío fin 
 2. Copia y pega el enlace: Copia el enlace generado y pégalo en tu navegador. Selecciona el servidor donde quieres agregar el bot y autorízalo.
 
 
-### Instalación
+## Uso en Discord
+Para poder usar el bot hay que conectarse a discord al canal **Data Bootcampers**.
 
-## Uso
+Con el comando `!help` se accede a la ayuda. El bot devolverá lo siguiente:
+
+# 📚 Comandos Disponibles
+## 💬 Chatear con el Bot
+Envía una pregunta a OpenAI y el bot te responderá.
+```
+$chat_command <mensaje>
+```
+
+
+## 📊 Información de la Sesión
+Obtén información detallada de la sesión actual, incluyendo el coste total y los tokens utilizados.
+```
+$stats_command
+```
+
+## 📋 Lista de Comandos
+Muestra todos los comandos disponibles.
+```
+$help_command
+```
+
+## ℹ️ Notas Adicionales
+- Asegúrate de usar los comandos tal como se muestran.
+- Los comandos no son sensibles a mayúsculas y minúsculas.
+- Si tienes alguna duda, usa el comando `$help_command` para obtener esta lista de comandos nuevamente.
+- Puedes ver más detalle del bot visitando el [repositorio](https://github.com/sertemo/DoGimoBot) de github.
+
 
 
 ## Tests
@@ -46,9 +75,8 @@ Pequeño proyecto de Bot para nuestro canal de Discord enfocado al desafío fin 
 ![Poetry](https://img.shields.io/badge/Poetry-60A5FA?style=for-the-badge&logo=python&logoColor=white)
 ![Discord](https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white)
 ![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white)
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
 
-
-## Contribuyentes
 
 ## Licencia
 Copyright 2024 Sergio Tejedor Moreno
