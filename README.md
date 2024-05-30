@@ -1,5 +1,5 @@
 # DoGimoBot
-### v0.1.0
+### v0.1.1
 
 ![Tests](https://github.com/sertemo/DoGimoBot/actions/workflows/tests.yml/badge.svg)
 [![codecov](https://codecov.io/gh/sertemo/DoGimoBot/graph/badge.svg?token=6N7LBN76A2)](https://codecov.io/gh/sertemo/DoGimoBot)
