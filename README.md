@@ -8,7 +8,7 @@
 ![Docker](https://img.shields.io/docker/image-size/sertemo/dogimobot?color=blue&logo=docker)
 
 ## Descripción
-Pequeño proyecto de Bot para nuestro canal de Discord enfocado al desafío fin de bootcamp entre Afonso, Carlos y yo. El Bot utiliza chatgpt en su modelo 3.5-turbo.
+Pequeño proyecto de Bot para nuestro canal de Discord enfocado al desafío fin de bootcamp entre Afonso, Carlos y yo. El Bot utiliza chatgpt.
 
 ![alt text](assets/img/banner.jpg)
 
@@ -30,9 +30,15 @@ Pequeño proyecto de Bot para nuestro canal de Discord enfocado al desafío fin 
 1. Genera el enlace de invitación: Ve a la sección de "OAuth2" en el menú de la izquierda, selecciona "URL Generator", marca el scope "bot" y selecciona los permisos que configuraste anteriormente.
 2. Copia y pega el enlace: Copia el enlace generado y pégalo en tu navegador. Selecciona el servidor donde quieres agregar el bot y autorízalo.
 
+## Configuración
+Se pueden configurar diferentes parámetros del bot en el archivo `settings.py` como por ejemplo:
+- El modelo de openai a utilizar
+- El system prompt
+- Los diferentes comandos a los cuales el bot debe responder
+- El número de mensajes máximo que debe recordar el bot
 
 ## Uso en Discord
-Para poder usar el bot hay que conectarse a discord al canal **Data Bootcampers**.
+Para poder usar el bot hay que conectarse a discord al canal `Data Bootcampers`.
 
 Con el comando `!help` se accede a la ayuda. El bot devolverá lo siguiente:
 
@@ -63,6 +69,7 @@ $help_command
 - Puedes ver más detalle del bot visitando el [repositorio](https://github.com/sertemo/DoGimoBot) de github.
 
 ## SemVer
+- 0.1.1 : Mejorado **System prompt** para dirigirse a los usuarios por nombre propio
 
 ## Tests
 ![Pytest](https://img.shields.io/badge/testing-pytest-blue.svg)

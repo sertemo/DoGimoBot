@@ -1,10 +1,9 @@
 # 📚 Comandos Disponibles
 ## 💬 Chatear con el Bot
-Envía una pregunta a OpenAI y el bot te responderá.
+Envía una pregunta a DoGimoBot y él te responderá.
 ```
 $chat_command <mensaje>
 ```
-
 
 ## 📊 Información de la Sesión
 Obtén información detallada de la sesión actual, incluyendo el coste total y los tokens utilizados.

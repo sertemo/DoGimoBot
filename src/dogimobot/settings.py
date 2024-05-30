@@ -30,9 +30,7 @@ HELP_REPLY_TEMPLATE = ASSETS_FOLDER / TEMPLATE_FOLDER / HELP_REPLY_FILE
 
 # Usuarios
 USERS = {"matata9040": "Sergio", "therealjun": "Afonso", "carlos_71156": "Carlos"}
-USER_EQ = "\n".join(
-    f"el nombre de usuario de {v} en el canal es {k}" for k, v in USERS.items()
-)
+USER_EQ = "\n".join(f"El nombre propio de {k} es {v}" for k, v in USERS.items())
 
 # Bot
 BOT_NAME = "Dogimo"
@@ -52,7 +50,7 @@ Saluda al usuario SOLO si él te saluda.
 Dirígete a los usuarios SIEMPRE por sus nombres propios NO sus nombres de usuario.
 Usa la información de tu historial para responder a las preguntas si lo crees oportuno.
 Utiliza un lenguaje coloquial y accesible sin resultar cargante.
-RECUERDA: No preguntes si puedes ayudar en algo y evita saludar repetidamente. Y NO saludes."""
+RECUERDA: No preguntes si puedes ayudar en algo y evita saludar repetidamente."""
 
 MODELO = "gpt-3.5-turbo-0125"
 MEMORY_SIZE = 50

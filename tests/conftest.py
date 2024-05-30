@@ -20,6 +20,7 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 import discord
 from dogimobot.main import DiscordClient
+from dogimobot.stats import BotStats
 
 # Mock settings to use in tests
 class MockSettings:
@@ -38,6 +39,10 @@ class MockSettings:
             "out": 0.0002,
         }
     }
+
+@pytest.fixture
+def bot_stats(scope="session"):
+    return BotStats()
 
 @pytest.fixture(scope="session")
 def mock_settings():

@@ -91,13 +91,18 @@ class DiscordClient(discord.Client):
         return mensaje
 
     def _save_in_memory(self, message: Message) -> None:
-        """Guarda un dict en memoria para
+        """Guarda un dict en memoria para pasarle
+        a openAI con las conversaciones anteriores
+        Guarda solo los mensajes de los usuarios
 
         Parameters
         ----------
         message : Message
             _description_
         """
+        """ if message.author == self.user:
+            return """
+
         mensaje = self._remove_command_from_msg(message)
         self.memory.append(
             {
@@ -217,7 +222,9 @@ class DiscordClient(discord.Client):
         return prompt_tokens, completion_tokens
 
     async def on_ready(self):
-        logger.info(f"********* SESSION ID {self.session_id} *********")
+        logger.info(
+            f"********* SESSION STARTED*********\nSESSION ID {self.session_id} *********"
+        )
         ic(f"Logged on as {self.user}")
 
     async def on_message(self, message: Message):
@@ -228,12 +235,12 @@ class DiscordClient(discord.Client):
         # Inicializamos reply para evitar errores
         reply = ""
 
-        # Guarda el mensaje en la memoria
+        # Guarda el mensaje en la memoria tanto del usuario como del bot
         self._save_in_memory(message)
 
         # Logging
         logger.info(
-            f"SESSION STARTED\nSESSION ID: {self.session_id} | {message.author} dijo: {message.content}"
+            f"SESSION ID: {self.session_id} | {message.author} dijo: {message.content}"
         )
 
         # Si el mensaje contiene el comando, responde
@@ -271,7 +278,7 @@ class DiscordClient(discord.Client):
             # Alimentamos las estadísticas
             self.bot_stats.add_user_stats(message, total_tokens, total_cost)
 
-            # Añadimos la respuesta a memoria
+            # Añadimos la respuesta a memori
             self.memory.append(
                 {"role": "assistant", "content": reply, "author": settings.BOT_NAME}
             )
