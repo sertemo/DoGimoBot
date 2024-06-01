@@ -51,4 +51,5 @@ addopts = "--cov=dogimobot"
 testpaths = [
    "tests",
 ]
+filterwarnings = "ignore::DeprecationWarning"
 pythonpath = ["src"]

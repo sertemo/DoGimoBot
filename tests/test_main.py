@@ -74,7 +74,7 @@ async def test_get_response_from_openai(client: DiscordClient):
     client.client_openai.chat = MagicMock()
     client.client_openai.chat.completions.create = AsyncMock(return_value=MagicMock(spec=ChatCompletion))
 
-    response = await client._get_response_from_openai(message=message, content=context)
+    response = await client._get_response_from_openai(message=message, context=context)
     client.client_openai.chat.completions.create.assert_called_once()
     assert response
 
