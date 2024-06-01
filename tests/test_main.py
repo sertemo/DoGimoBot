@@ -61,19 +61,20 @@ def test_get_context(client: DiscordClient):
     assert len(context) == 2  # System prompt + 1 message
     assert context[0]['role'] == 'system'
     assert context[1]['role'] == 'user'
-    assert 'testuser dijo: test message' in context[1]['content']
+    assert 'Test User dijo: test message' in context[1]['content']
 
 @pytest.mark.asyncio
 async def test_get_response_from_openai(client: DiscordClient):
     message = MagicMock(spec=Message)
     message.content = "!dog test message"
+    message.author.name = "testuser"
     context = client._get_context()
 
     # Ensure the OpenAI client's chat.completions.create method is patched
     client.client_openai.chat = MagicMock()
     client.client_openai.chat.completions.create = AsyncMock(return_value=MagicMock(spec=ChatCompletion))
 
-    response = await client._get_response_from_openai(message, context)
+    response = await client._get_response_from_openai(message=message, content=context)
     client.client_openai.chat.completions.create.assert_called_once()
     assert response
 

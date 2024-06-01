@@ -39,6 +39,7 @@ from dogimobot import settings
 from dogimobot.exceptions import FormatterException
 from dogimobot.formatters import format_stats, format_help
 from dogimobot.logging_config import logger
+from dogimobot.rate_limiting import RateLimiter
 from dogimobot.stats import BotStats
 from dogimobot.utils import get_discord_key, get_openai_key, get_project_version
 
@@ -138,17 +139,21 @@ class DiscordClient(discord.Client):
                 context.append(
                     ChatCompletionAssistantMessageParam(
                         role="assistant",
-                        content=f"{msg['author']} dijo: {msg['content']}",
+                        content=msg["content"],
                     )
                 )
             else:
                 context.append(
                     ChatCompletionUserMessageParam(
-                        role="user", content=f"{msg['author']} dijo: {msg['content']}"
+                        role="user",
+                        content=f"{settings.USERS[msg['author']]} dijo: {msg['content']}",
                     )
                 )
         return context
 
+    @RateLimiter.limit(
+        msg_per_minute=settings.MAX_MSG_PER_MINUTES, rate_time=settings.RATE_LIMIT
+    )
     def _get_response_from_openai(
         self, message: Message, context: list[ChatCompletionMessageParam]
     ) -> ChatCompletion:
@@ -160,6 +165,7 @@ class DiscordClient(discord.Client):
         ChatCompletion
             _description_
         """
+        print("Dentro de get_response_from_openai")
         response: ChatCompletion = self.client_openai.chat.completions.create(
             model=self.model,
             messages=context
@@ -167,9 +173,11 @@ class DiscordClient(discord.Client):
                 ChatCompletionUserMessageParam(
                     role="user",
                     content=self._remove_command_from_msg(message),
+                    name=message.author.name,  # TODO: Revisar si es necesario
                 )
             ],
         )
+        print("despues de completion create")
         return response
 
     def _get_reply_from_openai(self, response: ChatCompletion) -> str:
@@ -292,6 +300,8 @@ class DiscordClient(discord.Client):
             )
             logger.info(log_msg)
 
+            await message.channel.send(reply)
+
         elif message.content.lower().startswith(settings.INFO_COMMAND):
             elapsed_time = time.perf_counter() - self.session_start
             days, remainder = divmod(elapsed_time, 86400)  # 86400 segundos en un día
@@ -324,6 +334,8 @@ class DiscordClient(discord.Client):
                 reply = f"Se ha producido un error {exc}"
                 logger.error(reply)
                 print(reply)
+            finally:
+                await message.channel.send(reply)
 
         elif message.content.lower().startswith(settings.HELP_COMMAND):
             reply = format_help(
@@ -332,8 +344,7 @@ class DiscordClient(discord.Client):
                 stats_command=settings.INFO_COMMAND,
                 help_command=settings.HELP_COMMAND,
             )
-
-        await message.channel.send(reply)
+            await message.channel.send(reply)
 
 
 if __name__ == "__main__":

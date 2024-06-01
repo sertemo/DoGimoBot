@@ -70,6 +70,8 @@ $help_command
 
 ## SemVer
 - 0.1.1 : Mejorado **System prompt** para dirigirse a los usuarios por nombre propio
+- 0.2.0 : Añadido un **rate limit** de mensajes como decorador
+- 0.2.1 : Se envía el nombre a openai junto con la petición. Se corrige también el error: 400 Bad Request (error code: 50006): Cannot send an empty message
 
 ## Tests
 ![Pytest](https://img.shields.io/badge/testing-pytest-blue.svg)

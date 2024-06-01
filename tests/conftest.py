@@ -12,15 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from collections import deque
+from collections import deque, defaultdict
+from datetime import datetime
 import time
 
 from openai import OpenAI
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 import discord
+from discord import Message
+
 from dogimobot.main import DiscordClient
 from dogimobot.stats import BotStats
+from dogimobot.rate_limiting import RateLimiter
 
 # Mock settings to use in tests
 class MockSettings:
@@ -39,6 +43,19 @@ class MockSettings:
             "out": 0.0002,
         }
     }
+
+
+@pytest.fixture
+def mock_message():
+    message = MagicMock(spec=Message)
+    message.author.name = "testuser"
+    message.content = "test message"
+    return message
+
+
+@pytest.fixture
+def reset_rate_limiter():
+    RateLimiter.track = defaultdict(lambda: {"num_peticiones": 0, "start": datetime.now()})
 
 @pytest.fixture
 def bot_stats(scope="session"):
