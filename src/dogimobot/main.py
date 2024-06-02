@@ -146,7 +146,7 @@ class DiscordClient(discord.Client):
                 context.append(
                     ChatCompletionUserMessageParam(
                         role="user",
-                        content=f"{settings.USERS[msg['author']]} dijo: {msg['content']}",
+                        content=f"{settings.USERS[msg['author']]} dijo: {msg['content']}",  #TODO agregar fecha
                     )
                 )
         return context

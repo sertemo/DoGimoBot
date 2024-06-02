@@ -73,6 +73,9 @@ $help_command
 - 0.2.0 : Añadido un **rate limit** de mensajes como decorador
 - 0.2.1 : Se envía el nombre a openai junto con la petición. Se corrige también el error: 400 Bad Request (error code: 50006): Cannot send an empty message
 
+## Posibles mejoras
+- Añadir la fecha del mensaje del usuario cuando se crea el contexto
+
 ## Tests
 ![Pytest](https://img.shields.io/badge/testing-pytest-blue.svg)
 ![Black](https://img.shields.io/badge/code%20style-black-blue.svg)
