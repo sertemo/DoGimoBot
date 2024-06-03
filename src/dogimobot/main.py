@@ -16,11 +16,11 @@
 from collections import deque
 from datetime import datetime
 import time
-from typing import Deque, Union
+from typing import Deque, Union, Any
 import uuid
 
 import discord
-from discord import Message
+from discord import Message, Attachment
 from icecream import ic
 from openai import OpenAI
 from openai.types.chat.chat_completion import ChatCompletion
@@ -53,7 +53,7 @@ OpenAIMessageType = Union[
 class DiscordClient(discord.Client):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.memory: Deque[dict[str, str]] = deque(maxlen=settings.MEMORY_SIZE)
+        self.memory: Deque[dict[str, Any]] = deque(maxlen=settings.MEMORY_SIZE)
         self.model: str = settings.MODELO
         self.client_openai: OpenAI = OpenAI(api_key=get_openai_key())
         self.session_id: str = f"{uuid.uuid4()}"
@@ -104,7 +104,13 @@ class DiscordClient(discord.Client):
         """ if message.author == self.user:
             return """
 
+        adjuntos = None
         mensaje = self._remove_command_from_msg(message)
+
+        # Gestión de los adjuntos
+        if message.attachments:
+            adjuntos = message.attachments
+
         self.memory.append(
             {
                 "role": (
@@ -113,6 +119,7 @@ class DiscordClient(discord.Client):
                 "content": mensaje,
                 "author": str(message.author.name),
                 "time": datetime.now().strftime("%d/%m/%Y a las %H:%M:%S"),
+                "attachments": adjuntos,
             }
         )
 
@@ -121,6 +128,7 @@ class DiscordClient(discord.Client):
         apropiado para enviar a openai.
         Esta lista consta de los mensajes anteriores
         y del system prompt en el formato "role" y "content".
+        Gestiona también el uso de adjuntos en los mensajes.
 
         En el content se añade quien dijo el mensaje para que
         el chatbot sepa identificarlo.
@@ -144,13 +152,27 @@ class DiscordClient(discord.Client):
                     )
                 )
             else:
+                contenido = (
+                    f"El {msg['time']}, "
+                    f"{settings.USERS[msg['author']]} dijo: {msg['content']} "
+                )
+                # Comprobamos si ha mandado adjuntos
+                if msg["attachments"]:
+                    num_adjuntos = len(msg["attachments"])
+                    adjuntos: list[Attachment] = msg["attachments"]
+                    # Si ha mandado, añadimos el content_type y el filename
+                    # Hay que comprobar si content_type y filename son str
+                    contenido += (
+                        f"y envió {num_adjuntos} adjunto(s) "
+                        f"cuyos 'content_type' fueron: "
+                        f"'{', '.join([adjunto.content_type for adjunto in adjuntos if adjunto.content_type])}' "
+                        f"y cuyos 'filename' fueron: '{', '.join([adjunto.filename for adjunto in adjuntos])}'"
+                    )
+
                 context.append(
                     ChatCompletionUserMessageParam(
                         role="user",
-                        content=(
-                            f"El {msg['time']}, "
-                            f"{settings.USERS[msg['author']]} dijo: {msg['content']}"
-                        ),
+                        content=contenido,
                     )
                 )
         return context
