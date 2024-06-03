@@ -72,6 +72,7 @@ $help_command
 - 0.1.1 : Mejorado **System prompt** para dirigirse a los usuarios por nombre propio
 - 0.2.0 : Añadido un **rate limit** de mensajes como decorador
 - 0.2.1 : Se envía el nombre a openai junto con la petición. Se corrige también el error: 400 Bad Request (error code: 50006): Cannot send an empty message
+- 0.2.2 : Se añaden logs tb a la consola y se agrega la fecha del mensaje del usuario al contexto
 
 ## Posibles mejoras
 - Añadir la fecha del mensaje del usuario cuando se crea el contexto

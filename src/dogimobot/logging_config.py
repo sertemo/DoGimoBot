@@ -45,7 +45,7 @@ LOGGING_CONFIG = {
             "stream": "ext://sys.stdout",
         },
     },
-    "loggers": {"root": {"level": "INFO", "handlers": ["file"]}},
+    "loggers": {"root": {"level": "INFO", "handlers": ["file", "console"]}},
 }
 
 # Instanciamos el logger

@@ -23,7 +23,6 @@ import random
 from typing import Callable, Any
 
 from discord import Message
-from icecream import ic
 from openai.types.chat.chat_completion import ChatCompletion, Choice
 from openai.types.chat.chat_completion_message import ChatCompletionMessage
 
@@ -70,15 +69,10 @@ class RateLimiter:
         ) -> Callable[[Message, list[ChatCompletionMessage]], ChatCompletion]:
             @wraps(f)
             def wrapper(*args, **kwds) -> ChatCompletion:
-                print("Dentro del decorador RateLimiter.limit")
-                ic(kwds)
                 # Trackear el usuario
                 mensaje: Message = kwds["message"]
-                ic(mensaje)
                 user_key: str = mensaje.author.name
                 user_data = RateLimiter.track[user_key]
-                ic(user_key)
-                ic(user_data)
 
                 # Comprobar si el tiempo ha pasado un minuto
                 now: datetime = datetime.now()

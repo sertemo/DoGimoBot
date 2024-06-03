@@ -112,6 +112,7 @@ class DiscordClient(discord.Client):
                 ),
                 "content": mensaje,
                 "author": str(message.author.name),
+                "time": datetime.now().strftime("%d/%m/%Y a las %H:%M:%S"),
             }
         )
 
@@ -146,7 +147,10 @@ class DiscordClient(discord.Client):
                 context.append(
                     ChatCompletionUserMessageParam(
                         role="user",
-                        content=f"{settings.USERS[msg['author']]} dijo: {msg['content']}",  #TODO agregar fecha
+                        content=(
+                            f"El {msg['time']}, "
+                            f"{settings.USERS[msg['author']]} dijo: {msg['content']}"
+                        ),
                     )
                 )
         return context
@@ -165,7 +169,6 @@ class DiscordClient(discord.Client):
         ChatCompletion
             _description_
         """
-        print("Dentro de get_response_from_openai")
         response: ChatCompletion = self.client_openai.chat.completions.create(
             model=self.model,
             messages=context
@@ -173,11 +176,9 @@ class DiscordClient(discord.Client):
                 ChatCompletionUserMessageParam(
                     role="user",
                     content=self._remove_command_from_msg(message),
-                    name=message.author.name,  # TODO: Revisar si es necesario
                 )
             ],
         )
-        print("despues de completion create")
         return response
 
     def _get_reply_from_openai(self, response: ChatCompletion) -> str:
@@ -233,7 +234,7 @@ class DiscordClient(discord.Client):
         logger.info(
             f"********* SESSION STARTED*********\nSESSION ID {self.session_id} *********"
         )
-        ic(f"Logged on as {self.user}")
+        print(f"Logged on as {self.user}")
 
     async def on_message(self, message: Message):
         # No respondas a ti mismo o a otros bots
@@ -256,6 +257,7 @@ class DiscordClient(discord.Client):
 
             # Prepara el contexto incluyendo las últimas interacciones
             context = self._get_context()
+            ic(context)
 
             try:
                 response = self._get_response_from_openai(
@@ -286,7 +288,7 @@ class DiscordClient(discord.Client):
             # Alimentamos las estadísticas
             self.bot_stats.add_user_stats(message, total_tokens, total_cost)
 
-            # Añadimos la respuesta a memori
+            # Añadimos la respuesta a memoria
             self.memory.append(
                 {"role": "assistant", "content": reply, "author": settings.BOT_NAME}
             )
